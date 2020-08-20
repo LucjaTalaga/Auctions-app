@@ -1,0 +1,35 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    {% if alert is not None %}
+    <div class="alert alert-primary" role="alert">
+        {{ alert}}
+    </div>
+    {% endif %}
+
+    <h1>Listing: {{auction.name }}</h1>
+    {% if user.is_authenticated %}
+        <form action="{% url 'watchlist'%}" method="post">
+            {% csrf_token %} 
+            <input type="text" name="id" value={{ auction.id}} readonly id="watchlist"> 
+            <input type="submit" value="Watchlist">
+        </form>
+    {% endif %}
+
+    <img src={{ auction.photo }} >
+    <h2>${{ auction.price }}</h2>
+    {% if user.is_authenticated %}
+        <form action="{% url 'listing' auction.id %}" method="post">
+            {% csrf_token %}
+            <input type="text" name="bid" placeholder="Bid">
+            <input type="submit" value="Place Bid">
+        </form>
+    {% endif %}
+    <h2>Details</h2>
+    <ul>
+        <li>Listed by {{ auction.listed_by}}</li>
+        <li>Category: {{ auction.category}}</li>
+    </ul>
+
+{% endblock %}
