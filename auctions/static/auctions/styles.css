@@ -6,6 +6,9 @@ body {
     background-color: aliceblue;
 }
 
+a:hover{
+    text-decoration: none;
+}
 header{
     height: 15vh;
     min-height: 100px;
@@ -27,6 +30,9 @@ img {
     padding: 0.5rem 1.8rem;
 }
 
+.list-group-item a {
+    font-size: 20px;
+}
 .active-listing{
     margin: 40px 0;
     padding: 10px 0;
