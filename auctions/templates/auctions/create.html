@@ -3,7 +3,7 @@
 
 {% block body %}
     <h2>Create new listing</h2>
-    <form action="{% url 'create'%}" method="post">
+    <form action="{% url 'create'%}" method="post" id="create-form">
         {% csrf_token %}
         <label id="title"> Auction title <br/>
             <input type="text" name="title" placeholder="write the title of the auction" />
@@ -17,7 +17,9 @@
         <label id="img"> Image link <br/>
             <input type="text" name="img" placeholder="provide an image url" />
         </label>
-        <input type="submit" value="Create auction">
+        <div id="create-submit">
+            <input type="submit" value="Create auction">
+        </div>
     </form>
 
 {% endblock %}
