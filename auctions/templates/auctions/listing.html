@@ -7,6 +7,7 @@
         {{ alert}}
     </div>
     {% endif %}
+
     <div class="listing-box">
         <h1>Listing: {{auction.name }}</h1>
         {% if user.is_authenticated %}
@@ -19,6 +20,7 @@
 
         <img id="listing-photo" src={{ auction.photo }} >
         <h2>${{ auction.price }}</h2>
+
         {% if user.is_authenticated %}
             <form action="{% url 'listing' auction.id %}" method="post">
                 {% csrf_token %}
@@ -26,11 +28,36 @@
                 <input type="submit" value="Place Bid">
             </form>
         {% endif %}
+
+        {% if my_auction %}
+        <form id="close-auction" action="{% url 'listing' auction.id %}" method="post">
+            {% csrf_token %}
+            <input type="submit" value="Close auction">
+        </form>
+        {% endif %}
+
         <h2>Details</h2>
         <ul>
             <li>Listed by {{ auction.listed_by}}</li>
             <li>Category: {{ auction.category}}</li>
         </ul>
+        <h2>Comments:</h2>
+
+        {% for comment in comments %}
+            <div class="comment-box">
+                <h2>{{ comment.user_id }} wrote:</h2>
+                <p>{{ comment.comment }}</p>
+            </div>
+        {% endfor %}
+
+        <form action="{% url 'listing' auction.id %}" method="post">
+            {% csrf_token %}
+            <textarea name="comment" rows="5" cols="50"></textarea>
+            <input id="add-comment" type="submit" value="Add comment">
+        </form>
+         
+
+        
     </div>
 
 {% endblock %}

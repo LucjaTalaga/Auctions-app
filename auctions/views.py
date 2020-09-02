@@ -24,36 +24,57 @@ login_required(login_url='login')
 def listing(request, id, alert=None):
     auction = Auctions.objects.get(id=id)
     auction.price = utils.get_actual_price(auction)
+    user_name = request.user.username
+    logged_user = User.objects.get(username=user_name)
 
-    # place new bid for this listing
     if request.method == "POST":
-        bid = utils.get_number(request.POST["bid"])
-        if bid is None:
-            alert = "Error: Your bid must be a number"
-            is_bid_correct = False
-        else:
-            is_bid_correct = True
-        if is_bid_correct and auction.price >= bid:
-            alert = "Error: Your bid must be bigger than actual price"
-            is_bid_correct = False
 
-        if is_bid_correct is False:
-            return HttpResponseRedirect(reverse("listing", args=(id , alert)))
-        else:
-            user_name = request.user.username
-            logged_user = User.objects.get(username=user_name)
+        # place new bid for this listing
+        if 'bid' in request.POST:
+            bid = utils.get_number(request.POST["bid"])
+            if bid is None:
+                alert = "Error: Your bid must be a number"
+                is_bid_correct = False
+            else:
+                is_bid_correct = True
+            if is_bid_correct and auction.price >= bid:
+                alert = "Error: Your bid must be bigger than actual price"
+                is_bid_correct = False
 
-            new_bid = Bids(auction_id=auction, user_id=logged_user, price=bid)
-            new_bid.save()
-            alert= "Added new bid"
-            return HttpResponseRedirect(reverse("listing", args=(id , alert)))
+            if is_bid_correct is False:
+                return HttpResponseRedirect(reverse("listing", args=(id , alert)))
+            else:
+                new_bid = Bids(auction_id=auction, user_id=logged_user, price=bid)
+                new_bid.save()
+                alert= "Added new bid"
+                return HttpResponseRedirect(reverse("listing", args=(id , alert)))
+        
+        #add comment
+        elif 'comment' in request.POST:
+            new_comment = request.POST["comment"]
+            print(new_comment)
+            comment = Comments(auction_id=auction, user_id=logged_user, comment=new_comment)
+            comment.save()
+            return HttpResponseRedirect(reverse("listing", args=(id, )))
+
+        #close auction
+        else:
+            auction.delete()
+            return HttpResponseRedirect(reverse("index"))
 
     # view the actual listing         
     else:
+        if str(auction.listed_by) == user_name:
+            my_auction = True
+        else:
+            my_auction = False
         auction.price = format(auction.price, '.2f')
+        comments = Comments.objects.filter(auction_id=auction)
         return render(request, "auctions/listing.html",{
             "auction": auction,
-            "alert": alert
+            "alert": alert,
+            "my_auction": my_auction,
+            "comments": comments
         })
 
 
@@ -70,7 +91,6 @@ def categories(request):
 
 @login_required(login_url='login')
 def watchlist(request):
-
     user_name = request.user.username
     logged_user = User.objects.get(username=user_name)
 
@@ -122,6 +142,7 @@ def create(request, alert=None):
             id = int(new_auction.id)
             alert = "New auction added"
             return HttpResponseRedirect(reverse("listing", args=(id, alert)))
+
     # Displaying creating page
     else:
         return render(request, "auctions/create.html", {
